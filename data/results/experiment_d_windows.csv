@@ -1,0 +1,4 @@
+Window_Configuration,Window_Outputs_Generated,Calculation_Time_ms,Summary_Freshness_Interval_s,Overhead_Index
+10s Tumbling,5,80.09,10,1601.878
+30s Tumbling,5,52.43,30,1048.528
+60s Sliding (10s step),5000,22.53,10,0.451

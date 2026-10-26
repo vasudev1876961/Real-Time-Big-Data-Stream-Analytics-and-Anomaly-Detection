@@ -1,0 +1,23 @@
+[
+  {
+    "Record_Volume": 10000,
+    "Processing_Time_s": 2.1,
+    "Throughput_evt_s": 4762.9,
+    "Peak_Memory_MB": 6.52,
+    "Anomalies_Identified": 2580
+  },
+  {
+    "Record_Volume": 50000,
+    "Processing_Time_s": 15.69,
+    "Throughput_evt_s": 3187.4,
+    "Peak_Memory_MB": 31.79,
+    "Anomalies_Identified": 13339
+  },
+  {
+    "Record_Volume": 100000,
+    "Processing_Time_s": 30.4,
+    "Throughput_evt_s": 3289.7,
+    "Peak_Memory_MB": 63.44,
+    "Anomalies_Identified": 26804
+  }
+]

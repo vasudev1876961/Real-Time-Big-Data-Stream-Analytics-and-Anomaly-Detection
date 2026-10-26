@@ -1,0 +1,34 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Tools and Local Binaries (Kafka, Winutils)
+tools/
+
+# Kafka runtime broker logs
+data/kafka-logs/
+
+# Spark runtime checkpoints & metadata
+data/checkpoints/
+metastore_db/
+derby.log
+.ivy2/
+
+# SQLite runtime analytical database (exclude live WAL and DB, keep sample data & benchmark results)
+*.db
+*.db-wal
+*.db-shm
+
+# Python bytecode & caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

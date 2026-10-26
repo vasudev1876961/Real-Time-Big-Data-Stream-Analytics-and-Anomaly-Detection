@@ -1,0 +1,4 @@
+Target_Rate_Hz,Total_Events,Actual_Ingestion_Rate,Actual_Processing_Throughput,Avg_Latency_ms,P95_Latency_ms,P99_Latency_ms
+100,300,95.4,51.5,19.404,30.018,35.221
+500,1500,405.7,59.1,16.928,25.619,29.198
+1000,3000,666.4,60.0,16.678,25.97,29.708

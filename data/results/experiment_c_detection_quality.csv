@@ -1,0 +1,4 @@
+Method,Precision,Recall,F1_Score,FPR,TP,FP,FN,TN
+Threshold Detection,1.0,0.8906,0.9421,0.0,1172,0,144,3684
+Rolling Z-Score,0.882,0.25,0.3896,0.0119,329,44,987,3640
+Isolation Forest,1.0,0.2052,0.3405,0.0,270,0,1046,3684

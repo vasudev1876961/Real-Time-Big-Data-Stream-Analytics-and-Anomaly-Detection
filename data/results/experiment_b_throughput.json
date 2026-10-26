@@ -1,0 +1,29 @@
+[
+  {
+    "Target_Rate_Hz": 100,
+    "Total_Events": 300,
+    "Actual_Ingestion_Rate": 95.4,
+    "Actual_Processing_Throughput": 51.5,
+    "Avg_Latency_ms": 19.404,
+    "P95_Latency_ms": 30.018,
+    "P99_Latency_ms": 35.221
+  },
+  {
+    "Target_Rate_Hz": 500,
+    "Total_Events": 1500,
+    "Actual_Ingestion_Rate": 405.7,
+    "Actual_Processing_Throughput": 59.1,
+    "Avg_Latency_ms": 16.928,
+    "P95_Latency_ms": 25.619,
+    "P99_Latency_ms": 29.198
+  },
+  {
+    "Target_Rate_Hz": 1000,
+    "Total_Events": 3000,
+    "Actual_Ingestion_Rate": 666.4,
+    "Actual_Processing_Throughput": 60.0,
+    "Avg_Latency_ms": 16.678,
+    "P95_Latency_ms": 25.97,
+    "P99_Latency_ms": 29.708
+  }
+]

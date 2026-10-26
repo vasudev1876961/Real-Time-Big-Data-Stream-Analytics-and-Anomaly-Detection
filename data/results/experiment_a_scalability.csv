@@ -1,0 +1,4 @@
+Record_Volume,Processing_Time_s,Throughput_evt_s,Peak_Memory_MB,Anomalies_Identified
+10000,2.1,4762.9,6.52,2580
+50000,15.69,3187.4,31.79,13339
+100000,30.4,3289.7,63.44,26804

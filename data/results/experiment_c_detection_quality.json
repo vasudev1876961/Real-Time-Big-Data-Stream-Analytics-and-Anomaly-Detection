@@ -1,0 +1,71 @@
+{
+  "sample_size": 5000,
+  "anomaly_rate": 0.2632,
+  "metrics": [
+    {
+      "Method": "Threshold Detection",
+      "Precision": 1.0,
+      "Recall": 0.8906,
+      "F1_Score": 0.9421,
+      "FPR": 0.0,
+      "TP": 1172,
+      "FP": 0,
+      "FN": 144,
+      "TN": 3684
+    },
+    {
+      "Method": "Rolling Z-Score",
+      "Precision": 0.882,
+      "Recall": 0.25,
+      "F1_Score": 0.3896,
+      "FPR": 0.0119,
+      "TP": 329,
+      "FP": 44,
+      "FN": 987,
+      "TN": 3640
+    },
+    {
+      "Method": "Isolation Forest",
+      "Precision": 1.0,
+      "Recall": 0.2052,
+      "F1_Score": 0.3405,
+      "FPR": 0.0,
+      "TP": 270,
+      "FP": 0,
+      "FN": 1046,
+      "TN": 3684
+    }
+  ],
+  "confusion_matrices": {
+    "Threshold Detection": [
+      [
+        3684,
+        0
+      ],
+      [
+        144,
+        1172
+      ]
+    ],
+    "Rolling Z-Score": [
+      [
+        3640,
+        44
+      ],
+      [
+        987,
+        329
+      ]
+    ],
+    "Isolation Forest": [
+      [
+        3684,
+        0
+      ],
+      [
+        1046,
+        270
+      ]
+    ]
+  }
+}

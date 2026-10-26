@@ -1,0 +1,23 @@
+[
+  {
+    "Window_Configuration": "10s Tumbling",
+    "Window_Outputs_Generated": 5,
+    "Calculation_Time_ms": 80.09,
+    "Summary_Freshness_Interval_s": 10,
+    "Overhead_Index": 1601.878
+  },
+  {
+    "Window_Configuration": "30s Tumbling",
+    "Window_Outputs_Generated": 5,
+    "Calculation_Time_ms": 52.43,
+    "Summary_Freshness_Interval_s": 30,
+    "Overhead_Index": 1048.528
+  },
+  {
+    "Window_Configuration": "60s Sliding (10s step)",
+    "Window_Outputs_Generated": 5000,
+    "Calculation_Time_ms": 22.53,
+    "Summary_Freshness_Interval_s": 10,
+    "Overhead_Index": 0.451
+  }
+]
