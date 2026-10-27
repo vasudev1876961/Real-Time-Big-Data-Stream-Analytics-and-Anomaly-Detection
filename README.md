@@ -4,7 +4,7 @@
 [![Python 3.12](https://img.shields.io/badge/Python-3.12.8-blue.svg)](https://www.python.org/)
 [![Spark 3.5.3](https://img.shields.io/badge/Apache%20Spark-3.5.3-orange.svg)](https://spark.apache.org/)
 [![Kafka 4.4.0](https://img.shields.io/badge/Apache%20Kafka-4.4.0%20KRaft-black.svg)](https://kafka.apache.org/)
-[![Tests Passing](https://img.shields.io/badge/Tests-14%2F14%20Passing-brightgreen.svg)]()
+[![Tests Passing](https://img.shields.io/badge/Tests-16%2F16%20Passing-brightgreen.svg)]()
 
 ---
 
@@ -75,6 +75,8 @@ BDA/
 │   └── kafka_kraft.properties    # KRaft broker configuration
 ├── data/
 │   ├── sample_events.csv         # 1,000-event offline reference dataset
+│   ├── real_sensor_stream.csv    # 5,000-event industrial machinery reference trace
+│   ├── generate_industrial_dataset.py # Industrial trace generator
 │   ├── checkpoints/              # Spark streaming recovery checkpoints
 │   ├── kafka-logs/               # Kafka partition segments
 │   └── results/                  # Benchmark metrics (CSV/JSON) & generated plots
@@ -85,6 +87,7 @@ BDA/
 ├── producer/
 │   ├── __init__.py
 │   ├── event_generator.py        # Synthetic industrial sensor simulator
+│   ├── dataset_replayer.py       # Live stream replayer with real-time timestamp shifting
 │   └── kafka_producer.py         # Multi-threaded Kafka telemetry stream producer
 ├── streaming/
 │   ├── __init__.py
@@ -101,19 +104,27 @@ BDA/
 │   └── scalability_test.py       # Experiments A & D benchmark scripts
 ├── tests/
 │   ├── test_generator.py         # Generator schema and reproducibility tests
+│   ├── test_dataset_replayer.py  # Dataset replayer validation tests
 │   ├── test_kafka_pipeline.py    # Kafka broker round-trip integration test
 │   ├── test_anomaly_detectors.py # Unit tests for all three detectors
 │   ├── test_spark_processor.py   # Schema and micro-batch processing tests
 │   └── test_end_to_end_smoke.py  # Full end-to-end integration smoke test
 ├── scripts/
+│   ├── start_all.bat             # 1-Click launcher for all 4 pipeline components
+│   ├── stop_all.bat              # 1-Click shutdown for all pipeline components
 │   ├── start_kafka.bat           # Launch local Kafka KRaft broker
 │   ├── stop_kafka.bat            # Gracefully stop Kafka broker
-│   ├── run_producer.bat          # Launch event producer
+│   ├── run_producer.bat          # Launch real-time event generator
+│   ├── run_dataset_replayer.bat  # Replay industrial trace with timestamp shifting
 │   ├── run_spark.bat             # Launch Spark streaming engine
-│   └── run_dashboard.bat         # Launch Streamlit dashboard
+│   └── run_dashboard.bat         # Launch Streamlit live dashboard
+├── presentation/
+│   └── index.html                # Interactive dark-mode HTML5 presentation deck
 ├── tools/                        # Bundled Windows binaries (Kafka, Hadoop winutils)
 ├── docker-compose.yml            # Optional containerized broker deployment
 ├── requirements.txt              # Pinned Python dependencies
+├── ACADEMIC_REPORT.md            # Comprehensive 12-page academic research paper
+├── PRESENTATION_OUTLINE.md       # 15-minute viva/defense speaking outline
 └── README.md                     # Project documentation
 ```
 
@@ -121,35 +132,60 @@ BDA/
 
 ## 5. Execution Instructions (Step-by-Step)
 
+### Option 1: One-Click Full Pipeline Launch (Recommended)
+Double-click or run:
+```powershell
+.\scripts\start_all.bat
+```
+*This automatically spins up Kafka, Spark Structured Streaming, the Streamlit Dashboard, and the Telemetry Producer in 4 dedicated synchronized terminal windows.*
+
+To stop all services cleanly:
+```powershell
+.\scripts\stop_all.bat
+```
+
+### Option 2: Manual Step-by-Step Launch
 Open **4 separate PowerShell or Command Prompt terminals** in the project directory:
 
-### Terminal 1: Start Apache Kafka (KRaft Mode)
+#### Terminal 1: Start Apache Kafka (KRaft Mode)
 ```powershell
 .\scripts\start_kafka.bat
 ```
 *Wait ~5 seconds until `[KafkaRaftServer nodeId=1] Kafka Server started` is displayed.*
 
-### Terminal 2: Start Spark Structured Streaming
+#### Terminal 2: Start Spark Structured Streaming
 ```powershell
 .\scripts\run_spark.bat
 ```
 *Initializes PySpark with the Kafka connector and begins executing micro-batches every 2 seconds.*
 
-### Terminal 3: Start Streamlit Live Dashboard
+#### Terminal 3: Start Streamlit Live Dashboard
 ```powershell
 .\scripts\run_dashboard.bat
 ```
 *Opens your web browser automatically at `http://localhost:8501`.*
 
-### Terminal 4: Start Sensor Event Producer
+#### Terminal 4: Start Sensor Event Producer (or Replayer)
+To stream synthetic real-time telemetry:
 ```powershell
 .\scripts\run_producer.bat
 ```
-*Streams timestamped telemetry events to Kafka at 10 Hz (configurable via `--rate <Hz>`).*
+Or to replay historical industrial equipment sensor traces:
+```powershell
+.\scripts\run_dataset_replayer.bat
+```
 
 ---
 
-## 6. Experimental Findings & Benchmark Results
+## 6. Academic Deliverables & Interactive Presentation Deck
+
+- **Academic Technical Paper:** [ACADEMIC_REPORT.md](file:///c:/Users/vasud/OneDrive/Desktop/BDA/ACADEMIC_REPORT.md)
+- **Viva / Defense Speaking Outline:** [PRESENTATION_OUTLINE.md](file:///c:/Users/vasud/OneDrive/Desktop/BDA/PRESENTATION_OUTLINE.md)
+- **Interactive Presentation Deck:** Open [presentation/index.html](file:///c:/Users/vasud/OneDrive/Desktop/BDA/presentation/index.html) in any web browser to view the interactive presentation (navigate using `Space`, `Arrow Keys`, or on-screen buttons).
+
+---
+
+## 7. Experimental Findings & Benchmark Results
 
 All experiments were executed on the host system with measurements saved to `data/results/`:
 
@@ -189,7 +225,7 @@ All experiments were executed on the host system with measurements saved to `dat
 
 ---
 
-## 7. Automated Testing Suite
+## 8. Automated Testing Suite
 
 To verify all components across the pipeline, run `pytest`:
 
@@ -199,15 +235,16 @@ To verify all components across the pipeline, run `pytest`:
 
 **Results:**
 - `test_generator.py` (4 tests) — Schema validation, physical constraints, reproducibility.
+- `test_dataset_replayer.py` (2 tests) — Industrial dataset replay and dynamic timestamp shifting.
 - `test_kafka_pipeline.py` (1 test) — Producer delivery, broker partitioning, consumer roundtrip.
 - `test_anomaly_detectors.py` (6 tests) — Limits, warm-up, zero-std guards, ML inference.
 - `test_spark_processor.py` (2 tests) — Spark schema validation and micro-batch processing.
 - `test_end_to_end_smoke.py` (1 test) — Full pipeline integration verification.
-- **Total: 14 passing tests (100% pass rate).**
+- **Total: 16 passing tests (100% pass rate).**
 
 ---
 
-## 8. Limitations & Distinctions
+## 9. Limitations & Distinctions
 
 1. **Micro-Batch Latency:** Spark Structured Streaming operates via micro-batches (default 2s triggers), providing near real-time (sub-second to multi-second) latency rather than microsecond continuous event-at-a-time processing.
 2. **Local Single-Node Constraints:** Local Spark and Kafka emulate a distributed cluster using multi-threading and local partitions on a single JVM. True horizontal scalability requires multi-node cluster deployment (e.g. AWS EMR, Databricks, or Kubernetes).

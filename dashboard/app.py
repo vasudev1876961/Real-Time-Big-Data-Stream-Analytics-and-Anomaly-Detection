@@ -94,13 +94,21 @@ auto_refresh = st.sidebar.toggle("Auto-Refresh Live Stream", value=True)
 refresh_interval = st.sidebar.slider("Refresh Interval (seconds)", min_value=1, max_value=10, value=2)
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("🎛️ Simulation Generator")
+st.sidebar.subheader("🎛️ Anomaly Injection Scenarios")
 
-gen_rate = st.sidebar.slider("Event Rate (Hz)", min_value=1, max_value=100, value=10)
-gen_anomaly_prob = st.sidebar.slider("Anomaly Probability", min_value=0.0, max_value=0.5, value=0.1, step=0.01)
+scenario = st.sidebar.selectbox(
+    "Select Failure Mode",
+    [
+        "Thermal Runaway (+48°C)",
+        "Bearing Imbalance (1.35g Vib)",
+        "Hydraulic Rupture (45 kPa Drop)",
+        "Multivariate Cavitation (Sub-limit Combo)"
+    ]
+)
+target_sensor = st.sidebar.selectbox("Target Sensor", config.generator.sensors)
 
 col_sim1, col_sim2 = st.sidebar.columns(2)
-inject_anomaly = col_sim1.button("Inject Anomaly 🚨")
+inject_anomaly = col_sim1.button("Inject Failure 🚨")
 clear_db = col_sim2.button("Reset DB 🗑️")
 
 if clear_db:
@@ -112,22 +120,39 @@ if inject_anomaly:
     from producer.kafka_producer import SensorKafkaProducer
     p = SensorKafkaProducer(rate_hz=10)
     if p.connect(max_retries=2):
-        # Generate an extreme spike
-        spike_evt = {
-            "event_id": f"inject_{int(time.time()*1000)}",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "sensor_id": "sensor_01",
-            "temperature": 96.8,
-            "vibration": 1.15,
-            "pressure": 138.4,
-            "ground_truth_label": "anomaly",
-            "anomaly_type": "point",
-            "anomaly_severity": "high"
-        }
-        p.send_single_event(spike_evt)
+        now_ts = datetime.now(timezone.utc).isoformat()
+        evt_id = f"inject_{int(time.time()*1000)}"
+
+        if "Thermal" in scenario:
+            payload = {
+                "event_id": evt_id, "timestamp": now_ts, "sensor_id": target_sensor,
+                "temperature": 98.6, "vibration": 0.38, "pressure": 102.1,
+                "ground_truth_label": "anomaly", "anomaly_type": "point", "anomaly_severity": "high"
+            }
+        elif "Bearing" in scenario:
+            payload = {
+                "event_id": evt_id, "timestamp": now_ts, "sensor_id": target_sensor,
+                "temperature": 46.2, "vibration": 1.35, "pressure": 101.8,
+                "ground_truth_label": "anomaly", "anomaly_type": "point", "anomaly_severity": "high"
+            }
+        elif "Hydraulic" in scenario:
+            payload = {
+                "event_id": evt_id, "timestamp": now_ts, "sensor_id": target_sensor,
+                "temperature": 44.5, "vibration": 0.36, "pressure": 45.2,
+                "ground_truth_label": "anomaly", "anomaly_type": "point", "anomaly_severity": "high"
+            }
+        else:
+            # Multivariate Cavitation: All values in marginal bounds, but abnormal combo
+            payload = {
+                "event_id": evt_id, "timestamp": now_ts, "sensor_id": target_sensor,
+                "temperature": 52.8, "vibration": 0.52, "pressure": 88.5,
+                "ground_truth_label": "anomaly", "anomaly_type": "multivariate", "anomaly_severity": "medium"
+            }
+
+        p.send_single_event(payload)
         p.producer.flush()
         p.stop()
-        st.sidebar.success("Controlled Anomaly Injected!")
+        st.sidebar.success(f"Injected '{scenario}' into {target_sensor}!")
     else:
         st.sidebar.error("Could not reach Kafka broker.")
 
@@ -309,13 +334,19 @@ with tab_alerts:
                 alerts_df["sensor_id"].str.contains(alert_search, case=False, na=False)
             ]
 
-        # Display table with styled columns
         st.dataframe(
             alerts_df[[
                 "event_id", "timestamp", "sensor_id", "temperature", "vibration",
                 "pressure", "detected_by", "severity", "explanation", "ground_truth_label"
             ]],
             use_container_width=True
+        )
+        csv_data = alerts_df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="📥 Export Anomaly Audit Log (CSV)",
+            data=csv_data,
+            file_name=f"anomaly_audit_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+            mime="text/csv",
         )
     else:
         st.info("No alerts currently matching filter.")

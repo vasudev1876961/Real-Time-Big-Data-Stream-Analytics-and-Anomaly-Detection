@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Big Data Stream Analytics & Anomaly Detection - Defense Presentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #121826;
+            --card-bg: rgba(26, 34, 52, 0.7);
+            --accent-blue: #38bdf8;
+            --accent-green: #34d399;
+            --accent-purple: #a855f7;
+            --accent-red: #f87171;
+            --accent-orange: #fbbf24;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-glow: rgba(56, 189, 248, 0.2);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 50% 10%, #1e293b 0%, var(--bg-primary) 70%);
+            color: var(--text-main);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .slide {
+            display: none;
+            width: 88vw;
+            max-width: 1300px;
+            height: 82vh;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 40px var(--border-glow);
+            padding: 48px 60px;
+            overflow-y: auto;
+            flex-direction: column;
+            justify-content: space-between;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .slide.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px) scale(0.99); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .slide-header {
+            margin-bottom: 24px;
+        }
+        .slide-tag {
+            display: inline-block;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+            color: var(--accent-blue);
+            background: rgba(56, 189, 248, 0.12);
+            padding: 6px 14px;
+            border-radius: 100px;
+            margin-bottom: 12px;
+        }
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(to right, #ffffff, #cbd5e1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.15;
+        }
+        h2 {
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 8px;
+        }
+        p {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            margin: 20px 0;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+            margin: 20px 0;
+        }
+        .card {
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.25s ease;
+        }
+        .card:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card p, .card li {
+            font-size: 0.98rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+        ul {
+            padding-left: 20px;
+            margin-top: 8px;
+        }
+        li {
+            margin-bottom: 6px;
+        }
+        code, pre {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .code-box {
+            background: #090d16;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.95rem;
+            color: #38bdf8;
+            overflow-x: auto;
+        }
+        .metric-val {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 8px 0;
+        }
+        .badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+        .badge-green { background: #065f46; color: #34d399; }
+        .badge-blue { background: #1e3a8a; color: #60a5fa; }
+        .badge-red { background: #7f1d1d; color: #f87171; }
+        .badge-orange { background: #78350f; color: #fbbf24; }
+
+        /* Navigation footer */
+        .controls {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 10px 24px;
+            border-radius: 100px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+        .btn-nav {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        .btn-nav:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--accent-blue);
+        }
+        .counter {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            margin-top: 12px;
+        }
+        th, td {
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        th {
+            background: rgba(255, 255, 255, 0.04);
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+    </style>
+</head>
+<body>
+
+<div class="slide-container">
+
+    <!-- Slide 1: Title -->
+    <div class="slide active">
+        <div class="slide-header">
+            <span class="slide-tag">Capstone & Academic Defense</span>
+            <h1>Real-Time Big Data Stream Analytics<br>& Anomaly Detection</h1>
+            <p style="margin-top: 16px; font-size: 1.25rem;">Using Apache Kafka (KRaft mode) and Apache Spark Structured Streaming</p>
+        </div>
+        <div class="grid-3" style="margin-top: 24px;">
+            <div class="card">
+                <span class="badge badge-blue">ENGINEERING DOMAIN</span>
+                <h3 style="margin-top: 12px; color: var(--accent-blue);">Stream Processing</h3>
+                <p>Event-time watermarking, micro-batch sliding & tumbling windows, dynamic aggregations.</p>
+            </div>
+            <div class="card">
+                <span class="badge badge-green">ANALYTICS DOMAIN</span>
+                <h3 style="margin-top: 12px; color: var(--accent-green);">Multi-Method AI</h3>
+                <p>Empirical evaluation of Threshold, Rolling Z-Score, and Isolation Forest models.</p>
+            </div>
+            <div class="card">
+                <span class="badge badge-orange">SYSTEMS DOMAIN</span>
+                <h3 style="margin-top: 12px; color: var(--accent-orange);">Single-Laptop Scale</h3>
+                <p>Self-contained KRaft broker, Project Tungsten Catalyst engine, and WAL SQLite store.</p>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 16px;">
+            <span style="font-size: 0.9rem; color: #64748b;">Presenter: <strong>Vasudeva</strong></span>
+            <span style="font-size: 0.9rem; color: #64748b;">Academic Year: <strong>2026</strong></span>
+        </div>
+    </div>
+
+    <!-- Slide 2: Problem Statement -->
+    <div class="slide">
+        <div class="slide-header">
+            <span class="slide-tag">Problem Formulation</span>
+            <h2>Why Traditional Batch Processing Fails</h2>
+            <p>High-velocity industrial systems cannot wait for hourly or daily ETL runs.</p>
+        </div>
+        <div class="grid-2">
+            <div class="card" style="border-left: 4px solid var(--accent-red);">
+                <h3 style="color: var(--accent-red);">❌ The Batch Dilemma</h3>
+                <ul>
+                    <li>Millions of records accumulate in cold storage before analysis.</li>
+                    <li>Detection Latency = <code>Batch Schedule Interval + Query Time</code>.</li>
+                    <li>A sudden bearing failure or cavitation spike goes undetected for hours.</li>
+                    <li>Results in destructive physical equipment loss and emergency downtime.</li>
+                </ul>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--accent-green);">
+                <h3 style="color: var(--accent-green);">✅ The Streaming Solution</h3>
+                <ul>
+                    <li>Process events continuously as they cross the network boundary.</li>
+                    <li>Stateful tumbling and sliding window aggregations (10s–60s).</li>
+                    <li>Sub-second to low-second end-to-end alert dispatch.</li>
+                    <li>Decoupled message buffering absorbs rate surges up to 1,000+ Hz.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="code-box">
+            Mathematical Objective: Minimize E2E Latency <code>L = T_display - T_event</code> while maximizing F1-Score on Point, Collective, and Multivariate Outliers.
+        </div>
+    </div>
+
+    <!-- Slide 3: Architecture -->
+    <div class="slide">
+        <div class="slide-header">
+            <span class="slide-tag">System Design</span>
+            <h2>End-to-End Pipeline Architecture</h2>
+            <p>Decoupled, event-driven streaming topology executing locally on a single machine.</p>
+        </div>
+        <div class="grid-3">
+            <div class="card">
+                <h3>1. Ingestion Layer</h3>
+                <p><strong>Producer & Kafka:</strong></p>
+                <ul>
+                    <li>Synthetic generator & dataset replayer.</li>
+                    <li>Partitions messages by <code>sensor_id</code> for strict temporal order.</li>
+                    <li>Apache Kafka 4.4.0 in <strong>KRaft mode</strong> (zero ZooKeeper).</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>2. Processing Layer</h3>
+                <p><strong>Spark Structured Streaming:</strong></p>
+                <ul>
+                    <li>Ingests from Kafka topic <code>sensor-readings</code>.</li>
+                    <li>JSON schema enforcement & watermarking.</li>
+                    <li>Calculates windowed aggregates per sensor.</li>
+                    <li>Executes Unified Anomaly Detection Engine.</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>3. Presentation Layer</h3>
+                <p><strong>Persistence & UI:</strong></p>
+                <ul>
+                    <li>SQLite with Write-Ahead Logging (WAL).</li>
+                    <li>Non-blocking concurrent reads and writes.</li>
+                    <li>Streamlit interactive glassmorphic dashboard.</li>
+                    <li>Plotly multi-sensor time-series visualization.</li>
+                </ul>
+            </div>
+        </div>
+        <div class="code-box">
+            Pipeline: Sensor Telemetry Generator → Kafka Broker (:9092) → Spark Streaming Engine → SQLite (WAL) → Streamlit (:8501)
+        </div>
+    </div>
+
+    <!-- Slide 4: Anomaly Detection -->
+    <div class="slide">
+        <div class="slide-header">
+            <span class="slide-tag">Analytical Core</span>
+            <h2>Multi-Method Anomaly Detection Engine</h2>
+            <p>Fair, side-by-side comparison of three distinct mathematical paradigms.</p>
+        </div>
+        <div class="grid-3">
+            <div class="card">
+                <span class="badge badge-blue">METHOD A</span>
+                <h3 style="margin-top: 8px;">Threshold Detection</h3>
+                <p><strong>Static Operating Envelope:</strong></p>
+                <ul>
+                    <li>Hard limits: <code>Temp > 75°C</code>, <code>Vib > 0.65g</code>, <code>Press ∉ [85, 115] kPa</code>.</li>
+                    <li>Extremely fast (O(1)), zero state.</li>
+                    <li>Catches catastrophic point spikes.</li>
+                    <li>Misses dynamic drifts and subtle combinations.</li>
+                </ul>
+            </div>
+            <div class="card">
+                <span class="badge badge-green">METHOD B</span>
+                <h3 style="margin-top: 8px;">Rolling Z-Score</h3>
+                <p><strong>Statistical History (N=30):</strong></p>
+                <ul>
+                    <li>Evaluates <code>Z = (x - μ) / σ</code> per sensor.</li>
+                    <li>Adapts to baseline operational shifts.</li>
+                    <li>Protected by physical noise floors (guards against σ = 0).</li>
+                    <li>Vulnerable to the "masking effect" during prolonged collective drifts.</li>
+                </ul>
+            </div>
+            <div class="card">
+                <span class="badge badge-purple">METHOD C</span>
+                <h3 style="margin-top: 8px;">Isolation Forest</h3>
+                <p><strong>Unsupervised ML Ensemble:</strong></p>
+                <ul>
+                    <li>100 random decision trees partitioning feature space [T, V, P].</li>
+                    <li>Pre-trained offline on normal patterns.</li>
+                    <li>Flags multivariate outliers where single metrics are individually normal.</li>
+                    <li>Delivered 100% precision in tests.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Experimental Results -->
+    <div class="slide">
+        <div class="slide-header">
+            <span class="slide-tag">Empirical Evaluation</span>
+            <h2>Benchmark Findings & Experimental Data</h2>
+            <p>Genuine measurements captured from running the pipeline locally on 16 GB RAM.</p>
+        </div>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Experiment C: Detection Quality (5,000 Events)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Precision</th>
+                            <th>Recall</th>
+                            <th>F1-Score</th>
+                            <th>FPR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Threshold</strong></td>
+                            <td><span class="badge badge-green">1.000</span></td>
+                            <td><span class="badge badge-green">0.891</span></td>
+                            <td><strong>0.942</strong></td>
+                            <td>0.000</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Rolling Z-Score</strong></td>
+                            <td>0.882</td>
+                            <td>0.250</td>
+                            <td>0.390</td>
+                            <td>0.012</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Isolation Forest</strong></td>
+                            <td><span class="badge badge-green">1.000</span></td>
+                            <td>0.205</td>
+                            <td>0.341</td>
+                            <td>0.000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Experiment A: Data Volume Scalability</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Events</th>
+                            <th>Time (s)</th>
+                            <th>Throughput</th>
+                            <th>Peak RAM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>10,000</strong></td>
+                            <td>2.10 s</td>
+                            <td>4,763 evt/s</td>
+                            <td>6.5 MB</td>
+                        </tr>
+                        <tr>
+                            <td><strong>50,000</strong></td>
+                            <td>15.69 s</td>
+                            <td>3,187 evt/s</td>
+                            <td>31.8 MB</td>
+                        </tr>
+                        <tr>
+                            <td><strong>100,000</strong></td>
+                            <td>30.40 s</td>
+                            <td>3,290 evt/s</td>
+                            <td>63.4 MB</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Experiment B: Throughput & Latency</h3>
+                <p>Single-core analytical throughput plateaued at <strong>~60 events/second</strong> with sub-20ms per-event processing latency.</p>
+            </div>
+            <div class="card">
+                <h3>Verification Test Suite</h3>
+                <p><strong>14 / 14 Unit & Integration Tests Passing (100%)</strong> across generator, broker, detectors, and Spark micro-batch engine.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Live Demonstration & Defense -->
+    <div class="slide">
+        <div class="slide-header">
+            <span class="slide-tag">Demonstration Guide</span>
+            <h2>Live Demonstration Sequence</h2>
+            <p>One-click commands for presenting the complete system during academic defense.</p>
+        </div>
+        <div class="grid-2">
+            <div class="card">
+                <h3>One-Click Launcher</h3>
+                <div class="code-box" style="margin-bottom: 12px;">
+                    .\scripts\start_all.bat
+                </div>
+                <p>Launches all 4 processes in designated windows:</p>
+                <ul>
+                    <li>Window 1: Apache Kafka KRaft Broker (:9092)</li>
+                    <li>Window 2: Spark Structured Streaming Processor</li>
+                    <li>Window 3: Streamlit Live Analytics Dashboard (:8501)</li>
+                    <li>Window 4: Telemetry Stream Producer</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Demonstration Highlights</h3>
+                <ul>
+                    <li><strong>Live Telemetry:</strong> Real-time Plotly charts updating automatically.</li>
+                    <li><strong>Window Aggregations:</strong> Tumbling window per-sensor statistics.</li>
+                    <li><strong>Scenario Injection:</strong> Click "Inject Failure 🚨" to inject Thermal Runaway or Bearing Imbalance live.</li>
+                    <li><strong>Audit Export:</strong> Download real-time filtered CSV alert audit log.</li>
+                    <li><strong>Stop Command:</strong> Run <code>.\scripts\stop_all.bat</code> to shut down.</li>
+                </ul>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 16px;">
+            <p style="color: var(--accent-blue); font-weight: 600;">GitHub Repository: https://github.com/vasudev1876961/Real-Time-Big-Data-Stream-Analytics-and-Anomaly-Detection</p>
+        </div>
+    </div>
+
+</div>
+
+<!-- Navigation Controls -->
+<div class="controls">
+    <button class="btn-nav" id="prevBtn" title="Previous Slide (Left Arrow)">◀</button>
+    <span class="counter" id="slideCounter">Slide 1 / 6</span>
+    <button class="btn-nav" id="nextBtn" title="Next Slide (Right Arrow or Space)">▶</button>
+</div>
+
+<script>
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const counter = document.getElementById('slideCounter');
+    let currentSlide = 0;
+
+    function showSlide(index) {
+        slides.forEach((s, i) => {
+            s.classList.toggle('active', i === index);
+        });
+        currentSlide = index;
+        counter.textContent = `Slide ${currentSlide + 1} / ${slides.length}`;
+    }
+
+    prevBtn.addEventListener('click', () => {
+        if (currentSlide > 0) showSlide(currentSlide - 1);
+    });
+
+    nextBtn.addEventListener('click', () => {
+        if (currentSlide < slides.length - 1) showSlide(currentSlide + 1);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            if (currentSlide < slides.length - 1) showSlide(currentSlide + 1);
+        } else if (e.key === 'ArrowLeft') {
+            if (currentSlide > 0) showSlide(currentSlide - 1);
+        }
+    });
+</script>
+
+</body>
+</html>
